@@ -15,17 +15,27 @@ Con's:
 ### Setup
 Use a the JAR file produced, you should start with Apache Zeppelin like so:
 ```
-docker run -p 8080:8080 --rm apache/zeppelin:0.8.1
+docker run -p 8080:8080 -v /Users/<username>/data/:/data/ --rm apache/zeppelin:0.8.1
 ```
 
-One started, point your browser to: http://localhost:8080/
+*Note*: the directory mapping. This is where your data will be stored.
+We will also use the mapped path to copy the JAR into the Zeppelin container.
+
+Once started, point your browser to: http://localhost:8080/
+
+Import `notebooks/SetupData.json` to create some data and setup the project
+If you run all paragraphs you should have created a simple parquet file with 3 rows of data.
 
 ### Building
 ```
 sbt package
+mv target/scala-2.12/schemaonreadwithspark_2.12-0.1.jar ~/data/schemaonreadwithspark_2.12-0.1.jar 
 ```
 
 ### Using the JAR
+With the JAR available, you can see the sample script by loading `notebooks/DataConsumption.json` into Zeppelin.
+
+The principal is to use code to load a library which will provide the interpretation of the data on disk like so:
 ```
 z.load("/path/to.jar")
 import MyDataProducts.raw.ProductRawMenus

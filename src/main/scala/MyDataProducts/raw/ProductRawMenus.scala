@@ -28,8 +28,12 @@ object ProductRawMenus {
                    menu_items: Array[MenuItem]
                  )
 
+  case class MenuField(
+                      menu: Menu
+                      )
+
   case class OutputData(
-                    name: String,
+                    restaurant: String,
                     menu: Menu
                     )
 
@@ -38,13 +42,14 @@ object ProductRawMenus {
 
     val inputPath = "/data/parquet"
 
-    val rawSchema = ScalaReflection.schemaFor[OutputData].dataType.asInstanceOf[StructType]
+    val rawSchema = ScalaReflection.schemaFor[MenuField].dataType.asInstanceOf[StructType]
 
     sparkSession.read
       .format("parquet")
       .load(inputPath)
+      .withColumnRenamed("name", "restaurant")
       .withColumn("raw", from_json($"menu", rawSchema))
-      .select("name", "raw.*")
+      .select("restaurant", "raw.menu")
       .as[OutputData]
   }
 
