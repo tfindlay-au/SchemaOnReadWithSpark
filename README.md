@@ -13,10 +13,12 @@ Con's:
 * Traceability can be an issue
 
 ### Setup
-Use a the JAR file produced, you should start with Apache Zeppelin like so:
+To use a the JAR file produced, you should start with Apache Zeppelin like so:
 ```
 docker run -p 8080:8080 -v /Users/<username>/data/:/data/ --rm apache/zeppelin:0.8.1
 ```
+
+![alt Diaram](/docs/Diagram.jpg)
 
 *Note*: the directory mapping. This is where your data will be stored.
 We will also use the mapped path to copy the JAR into the Zeppelin container.
