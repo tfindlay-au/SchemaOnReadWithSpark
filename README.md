@@ -1,16 +1,19 @@
 # SchemaOnReadWithSpark
 
 ### Overview
-This project is aimed at demonstrating the pattern of applying a schema (interpretation of data) on consumption rather than on reciept.
+This project is aimed at demonstrating the pattern of applying a schema (interpretation of data) on consumption rather than on receipt.
 
-I have seem this pattern used a few times in the past and I think it addresses certain uses cases very well.
+I have seem this pattern used a few times in the past and I think it works well for some use cases.
 
-Pro's:
-* Faster ingestion
-* Flexible - The interpretation can change/evolve
+| Pro's | Con's|
+|----------------------------------------------|--------------------------------------------------|
+| * Faster ingestion | * Traceability can be an issue |
+| * More resilient ingestion | * Compute cost paid on access |
+| * Flexible - The interpretation can change/evolve | |
+| * Less data movement / duplication / reconciliation | |
+| * Less storage | |
 
-Con's:
-* Traceability can be an issue
+![alt Overview](/docs/Overview.jpg)
 
 ### Setup
 To use a the JAR file produced, you should start with Apache Zeppelin like so:
