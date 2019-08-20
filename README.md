@@ -3,7 +3,16 @@
 ### Overview
 This project is aimed at demonstrating the pattern of applying a schema (interpretation of data) on consumption rather than on receipt.
 
-I have seem this pattern used a few times in the past and I think it works well for some use cases.
+I have seem this pattern used a few times in the past and I think it works well for some use cases. 
+One of the interesting parts is applying software engineering principals including:
+* Version control
+* Unit testing
+* CI/CD
+* Documentation (ScalaDoc or similar)
+
+These are often easier to do when all of the business rules/logic are contained in a bundle the can be easily unit tested and versioned.
+
+In data pipelines, these are traditionally done (to some degree) with expensive commercial software but rarely done with Open Source tools and DIY pipelines.
 
 | Pro's | Con's|
 |----------------------------------------------|--------------------------------------------------|
@@ -12,6 +21,8 @@ I have seem this pattern used a few times in the past and I think it works well 
 | * Flexible - The interpretation can change/evolve | |
 | * Less data movement / duplication / reconciliation | |
 | * Less storage | |
+
+*Note*: These opinions are purely my own and dont reflect those of my employer or any anyone else. They are also subject to change as advancements in tooling change over time and my own experience changes.
 
 ![alt Overview](/docs/Overview.jpg)
 
@@ -31,6 +42,22 @@ Once started, point your browser to: http://localhost:8080/
 Import `notebooks/SetupData.json` to create some data and setup the project
 If you run all paragraphs you should have created a simple parquet file with 3 rows of data.
 
+### Generated Documentation
+```
+sbt doc
+```
+
+Once generated, HTML Scala Doc will be placed under `./target/scala-2.12/api/`
+
+Use your favourite browser to explore. This still requires developer discipline to put this in the code but provides
+more than you find in most SQL scripts.
+
+
+### Testing
+```
+sbt test
+```
+
 ### Building
 ```
 sbt package
@@ -48,3 +75,4 @@ val spark = SparkSession.builder.getOrCreate()
 import spark.implicits._
 val df = spark.productRawMenus()
 ```
+

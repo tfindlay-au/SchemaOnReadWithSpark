@@ -14,3 +14,7 @@ libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion
 //---------------------
 // Testing Frameworks
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+libraryDependencies += "org.scalamock" %% "scalamock-core" % "3.6.0" % "test"
+libraryDependencies += "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % "test"
+libraryDependencies += "org.mockito" % "mockito-all" % "1.10.19" % "test"
+
