@@ -70,9 +70,9 @@ With the JAR available, you can see the sample script by loading `notebooks/Data
 The principal is to use code to load a library which will provide the interpretation of the data on disk like so:
 ```
 z.load("/path/to.jar")
-import MyDataProducts.raw.ProductRawMenus
+import MyDataProducts.raw.ProductRawStock
 val spark = SparkSession.builder.getOrCreate()
 import spark.implicits._
-val df = spark.productRawMenus()
+val df = spark.productRawStock()
 ```
 
