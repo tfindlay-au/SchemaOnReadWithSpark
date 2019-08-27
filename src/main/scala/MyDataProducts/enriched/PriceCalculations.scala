@@ -1,6 +1,10 @@
 package MyDataProducts.enriched
 
-import org.apache.spark.sql.DataFrame
+import MyDataProducts.raw.ProductRawStock.StockData
+import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.functions.when
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.sources.GreaterThan
 
 /**
  * This object provides common logic used to enrich some data
@@ -10,38 +14,32 @@ import org.apache.spark.sql.DataFrame
 object PriceCalculations {
 
   /**
-   * This method performs a simple calculation on an input column.
+   * This method performs a simple test if the change is greater than 0
    * @note These should be testable units of logic
-   * @param df Incoming DataFrame with expected column
-   * @return
+   * @param df Incoming DataFrame with expected column `change`
+   * @return DataFrame with new column `is_trending_up`
    */
-  def GSTFunction(df: DataFrame): DataFrame = {
-    import df.sparkSession.implicits._
-    import org.apache.spark.sql.functions.explode
-
-    df.withColumn("original_price", explode($"menu.menu_items.price"))
-      .withColumn("priceWithGST", $"original_price" * 1.1)
-      .drop("original_price")
+  def is_trending_up(df: DataFrame): DataFrame = {
+    df.withColumn("is_trending_up", when(col("change").gt(0.000f), true).otherwise(false))
   }
 
   /**
    * Like above, this could also perform lookups, regex to break up strings or other "simple" transforms
    * @note Further protections can be added to only monkey patch a named Dataset rather than a generic DataFrame
-   * @param df Incoming data to be transformed.
-   * @return DataFrame with new column `priceWithCredCard`
+   * @param df Incoming data to be transformed. Requires column `volume` and `price`
+   * @return DataFrame with new column `market_cap`
    */
-  def CreditCardFeesFunction(df: DataFrame): DataFrame = {
-    import df.sparkSession.implicits._
-    df.withColumn("priceWithCredCard", $"menu.menu_items.price" * 0.012)
+  def market_cap(df: DataFrame): DataFrame = {
+    df.withColumn("market_cap", col("volume") * col("price"))
   }
 
   implicit class SparkSessionWithPriceCalculations(df: DataFrame) {
-    def withGST(): DataFrame = {
-      GSTFunction(df)
+    def withTrending(): DataFrame = {
+      is_trending_up(df)
     }
 
-    def withCreditCardFees(): DataFrame = {
-      CreditCardFeesFunction(df)
+    def withMarketCap(): DataFrame = {
+      market_cap(df)
     }
   }
 

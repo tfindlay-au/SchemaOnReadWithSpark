@@ -1,9 +1,9 @@
 package MyDataProducts.features
 
-import MyDataProducts.raw.ProductRawMenus
-import MyDataProducts.raw.ProductRawMenus.OutputData
+import MyDataProducts.raw.ProductRawStock
+import MyDataProducts.raw.ProductRawStock.StockData
 import org.apache.spark.sql.{Dataset, SparkSession}
-import org.apache.spark.sql.functions.explode
+import org.apache.spark.sql.functions.col
 
 /**
  * This object provides a defined feature for a use case.
@@ -12,33 +12,34 @@ import org.apache.spark.sql.functions.explode
  *
  * @example <pre>
  *          z.load("/path/to.jar")
- *          import MyDataProducts.raw.ProductRawMenus
+ *          import MyDataProducts.features.ProductTrendingStocks
  *          val spark = SparkSession.builder.getOrCreate()
  *          import spark.implicits._
- *          val df = spark.ProductVegetarianMenus()
+ *          val df = spark.productTrendingStocks()
  *          </pre>
  */
-object ProductVegetarianMenus {
+object ProductTrendingStocks {
 
   /**
    * The transformation logic is applied here...
    * @param sparkSession Spark instance to used
-   * @return Dataset of OutputData or you could define a new structure in this object
+   * @return Dataset of StockData or you could define a new structure in this object
    */
-  def transform(sparkSession: SparkSession): Dataset[OutputData] = {
+  def transform(sparkSession: SparkSession): Dataset[StockData] = {
+    import MyDataProducts.enriched.PriceCalculations._
     import sparkSession.implicits._
 
     // Leverage the logic to acquire the raw data
-    ProductRawMenus.transform(sparkSession)
-      // This is a horrible way to do this, dont ever do things like this
-      .withColumn("item_name", explode($"menu.menu_items.name"))
-      .where($"item_name".notEqual( "Ojo de bife"))
-      .drop("item_name")
-      .as[OutputData]
+    ProductRawStock.transform(sparkSession)
+      .toDF()
+      .withTrending()
+      .where(col("is_trending_up"))
+      .drop("is_trending_up")
+      .as[StockData]
   }
 
   implicit class SparkSessionWithProductVegetarianMenus(sparkSession: SparkSession) {
-    def productVegetarianMenus(): Dataset[OutputData] = {
+    def productTrendingStocks(): Dataset[StockData] = {
       transform(sparkSession)
     }
   }

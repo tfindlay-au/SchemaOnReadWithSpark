@@ -17,4 +17,4 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 libraryDependencies += "org.scalamock" %% "scalamock-core" % "3.6.0" % "test"
 libraryDependencies += "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % "test"
 libraryDependencies += "org.mockito" % "mockito-all" % "1.10.19" % "test"
-libraryDependencies += "com.holdenkarau" %% "spark-testing-base" % sparkVersion % "0.12.0" % "test"
+libraryDependencies += "com.holdenkarau" %% "spark-testing-base" % "2.4.3_0.12.0" % Test

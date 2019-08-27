@@ -1,8 +1,8 @@
 package MyDataProducts.enriched
 
-import com.holdenkarau.spark.testing.SharedSparkContext
+import com.holdenkarau.spark.testing.DataFrameSuiteBase
 import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.sql.types.{ArrayType, FloatType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{BooleanType, FloatType, StringType, StructField, StructType}
 import org.scalatest.MustMatchers._
 import org.scalatest.{Matchers, WordSpec}
 
@@ -10,71 +10,60 @@ object PriceCalculationsTest {
 
 }
 
-class PriceCalculationsTest extends WordSpec with Matchers with SharedSparkContext {
-//  override def withFixture(test: NoArgTest) = { // Define a shared fixture
-//    val mySchema = StructType(List(
-//      StructField("restaurant", StringType, nullable = true),
-//      StructField("menu", StructType(List(
-//        StructField("menu_items", ArrayType(StructType(List(
-//          StructField("item_type", StringType, nullable = true),
-//          StructField("name", StringType, nullable = true),
-//          StructField("price", FloatType, nullable = true)
-//        ))))
-//      )))
-//    ))
-//
-//    // Shared setup (run at beginning of each test)
-//    try test(mySchema)
-//    finally {
-//      // Shared cleanup (run at end of each test)
-//    }
-//  }
+class PriceCalculationsTest extends WordSpec with Matchers with DataFrameSuiteBase {
 
+  // TODO Push fixture into a trait perhaps ?
+  def productRawStockSchema = StructType(List(
+      StructField("stock_code", StringType, nullable = true),
+      StructField("company_name", StringType, nullable = true),
+      StructField("price", FloatType, nullable = true),
+      StructField("change", FloatType, nullable = true),
+      StructField("volume", FloatType, nullable = true)
+  ))
 
-  "GSTFunction" must {
-    "add column 'priceWithGST'" in {
-      // TODO Move to setup function
+  "PriceCalculations.is_trending_up" must {
+    "be true if change > 0 column" in {
       val spark = SparkSession.builder.getOrCreate()
-      import spark.implicits._
-
-      val mySchema = StructType(List(
-        StructField("restaurant", StringType, nullable = true),
-        StructField("menu", StructType(List(
-          StructField("menu_items", ArrayType(StructType(List(
-            StructField("item_type", StringType, nullable = true),
-            StructField("name", StringType, nullable = true),
-            StructField("price", FloatType, nullable = true)
-          ))))
-        )))
-      ))
 
       // Given an input data frame ...
-      val inputData = Seq(Row("TestRestaurant", "{\"menu\": { \"menu_items\": [  {\"item_type\": \"TestItem\", \"name\": \"TestName\", \"price\": 100.0 }}" ))
-      val inputDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(inputData), mySchema)
+      val inputData = Seq(Row("ABC", "A Better Company", 100.0f, 0.001f, 10000000f))
+      val inputDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(inputData), productRawStockSchema)
 
-      // When we call the GST function ...
-      val resultDataFrame = PriceCalculations.GSTFunction(inputDataFrame)
+      // When we call the function ...
+      val resultDataFrame = PriceCalculations.is_trending_up(inputDataFrame)
 
       // Then the result should be ...
-      val expectedDataFrame = Seq(
-        ("TestRestaurant", "{\"menu\": { \"menu_items\": [  {\"item_type\": \"TestItem\", \"name\": \"TestName\", \"price\": 100.0 }]}, \"priceWithGST\": 120.0 }" )
-      ).toDF()
-//      val expectedData = Seq(Row("TestRestaurant", "{\"menu\": { \"menu_items\": [  {\"item_type\": \"TestItem\", \"name\": \"TestName\", \"price\": 110.0 }}" ))
-//      val expectedDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(expectedData), mySchema)
+      val expectedData = Seq(Row("ABC", "A Better Company", 100.0f, 0.001f, 10000000f, true))
+      val newSchema = productRawStockSchema.add(StructField("is_trending_up", BooleanType, nullable = false))
+      val expectedDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(expectedData), newSchema)
 
-      // Use import com.holdenkarau.spark.testing.DataFrameSuiteBase
-      // with DataFrameSuiteBase
-      //      assertDataFrameEquals(expectedDataFrame, resultDataFrame)
-      resultDataFrame should be eq(expectedDataFrame)
-
+      assertDataFrameEquals(expectedDataFrame, resultDataFrame)
     }
 
-    "Still work if the menu.menu_items.price is missing" in {
+    "be false if change < 0 column" in {
+      val spark = SparkSession.builder.getOrCreate()
 
+      // Given an input data frame ...
+      val inputData = Seq(Row("ABC", "A Better Company", 100.0f, -0.001f, 10000000f))
+      val inputDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(inputData), productRawStockSchema)
+      inputDataFrame.show()
+
+      // When we call the function ...
+      val resultDataFrame = PriceCalculations.is_trending_up(inputDataFrame)
+      resultDataFrame.show()
+
+      // Then the result should be ...
+      val expectedData = Seq(Row("ABC", "A Better Company", 100.0f, -0.001f, 10000000f, false))
+      val newSchema = productRawStockSchema.add(StructField("is_trending_up", BooleanType, nullable = false))
+      val expectedDataFrame = spark.createDataFrame(spark.sparkContext.parallelize(expectedData), newSchema)
+      expectedDataFrame.show()
+
+      assertDataFrameEquals(expectedDataFrame, resultDataFrame)
     }
   }
 
-  "CreditCardFeesFunction" must {
+  "PriceCalculations.market_cap" must {
+
 
   }
 }
